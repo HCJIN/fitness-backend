@@ -13,14 +13,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
+@Configuration          // "이 파일은 설정 파일이에요" 라고 Spring에게 알려줌
+@EnableWebSecurity      // Spring Security 기능을 활성화함
+@RequiredArgsConstructor // final 필드를 생성자로 자동 주입 (Lombok)
 public class SecurityConfig {
 
-  private final JwtUtil jwtUtil;
+  private final JwtFilter jwtFilter;
 
-  @Bean
+  @Bean // Spring이 이 메서드의 리턴값을 관리하게 함
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     http
@@ -32,10 +32,7 @@ public class SecurityConfig {
             .requestMatchers("/api/auth/**").permitAll()
             .anyRequest().authenticated()
         )
-        .addFilterBefore(
-            new JwtFilter(jwtUtil),
-            UsernamePasswordAuthenticationFilter.class
-        );
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
