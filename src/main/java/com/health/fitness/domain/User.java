@@ -1,18 +1,17 @@
 package com.health.fitness.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.*;
 
-import java.util.Collection;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
 @Getter
-public class User implements UserDetails {  // 이 부분 추가
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,25 +23,25 @@ public class User implements UserDetails {  // 이 부분 추가
   @Column(nullable = false)
   private String password;
 
+  @Column(unique = true)
   private String nickname;
 
+  @Builder.Default
   @Column(columnDefinition = "INT DEFAULT 0")
-  private int point;
+  private int point = 0;
 
+  @Builder.Default
   @Column(columnDefinition = "INT DEFAULT 1")
-  private int level;
+  private int level = 1;
 
   @Column(columnDefinition = "VARCHAR(10) DEFAULT 'USER'")
-  private String role;
+  private String role = "USER";
 
-  // ↓ UserDetails 필수 구현 메서드들
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority("ROLE_" + role));
-  }
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDate createdAt;
 
-  @Override
-  public String getUsername() {
-    return email;  // Spring Security에서 username = email
+  @PrePersist
+  public void prePersist() {
+    this.createdAt = LocalDate.now();
   }
 }
