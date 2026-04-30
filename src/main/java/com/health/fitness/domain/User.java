@@ -34,6 +34,7 @@ public class User {
   @Column(columnDefinition = "INT DEFAULT 1")
   private int level = 1;
 
+  @Builder.Default
   @Column(columnDefinition = "VARCHAR(10) DEFAULT 'USER'")
   private String role = "USER";
 
