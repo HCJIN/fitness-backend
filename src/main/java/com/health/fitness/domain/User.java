@@ -1,45 +1,62 @@
-package com.health.fitness.domain;
+package com.health.fitness.config;
 
-import jakarta.persistence.*;
-import lombok.Getter;
+import com.health.fitness.filter.JwtFilter;
+import com.health.fitness.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-// @Entity → 이 클래스가 DB 테이블이랑 연결된다고 Spring에 알려줌
-// JPA가 이 클래스를 보고 자동으로 SQL을 만들어줌
-@Entity
+import java.util.List;
 
-// @Table → 연결할 DB 테이블 이름 지정
-// 안 쓰면 클래스 이름(User)이 테이블명이 되는데 명시적으로 써주는 게 좋음
-@Table(name = "users")
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
 
-// @Getter → 모든 필드의 getter 자동 생성 (Lombok)
-// getEmail(), getPassword(), getNickname() 등이 자동으로 생김
-@Getter
-public class User {
+  private final JwtFilter jwtFilter;
 
-  // @Id → 이 필드가 PK(기본키)임을 선언
-  // @GeneratedValue → PK 값을 DB가 자동으로 생성 (AUTO_INCREMENT)
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-  // @Column(unique = true) → DB에서 이 컬럼에 중복값 못 들어오게 제약 추가
-  // nullable = false → NULL 값 허용 안 함
-  @Column(unique = true, nullable = false)
-  private String email;
+    return http.build();
+  }
 
-  @Column(nullable = false)
-  private String password;
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of("http://localhost:5173"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setAllowCredentials(true);
 
-  private String nickname;
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+  }
 
-  // DEFAULT 0 → 가입 시 포인트 0으로 시작
-  @Column(columnDefinition = "INT DEFAULT 0")
-  private int point;
-
-  @Column(columnDefinition = "INT DEFAULT 1")
-  private int level;
-
-  // USER / ADMIN 두 가지 역할
-  @Column(columnDefinition = "VARCHAR(10) DEFAULT 'USER'")
-  private String role;
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }
