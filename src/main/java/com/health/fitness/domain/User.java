@@ -1,47 +1,62 @@
-package com.health.fitness.domain;
+package com.health.fitness.config;
 
-import jakarta.persistence.*;
-import lombok.*;
+import com.health.fitness.filter.JwtFilter;
+import com.health.fitness.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.time.LocalDate;
+import java.util.List;
 
-@Entity
-@Table(name = "users")
-@Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA를 위한 기본 생성자
-@AllArgsConstructor
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
 
-    @Column(unique = true, nullable = false)
-    private String email;
+  private final JwtFilter jwtFilter;
 
-    @Column(nullable = false)
-    private String password;
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-    @Column(unique = true)
-    private String nickname;
+    return http.build();
+  }
 
-    @Builder.Default // 빌더 사용 시에도 기본값을 유지하게 함
-    @Column(columnDefinition = "INT DEFAULT 0")
-    private int point = 0;
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowedOrigins(List.of("http://localhost:5173"));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setAllowCredentials(true);
 
-    @Builder.Default // 빌더 사용 시에도 기본값을 유지하게 함
-    @Column(columnDefinition = "INT DEFAULT 1")
-    private int level = 1;
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+  }
 
-    @Builder.Default
-    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'USER'")
-    private String role = "USER"; // 유저 : USER / 관리자 : admin
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDate createdAt;
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDate.now();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }
