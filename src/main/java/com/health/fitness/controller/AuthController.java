@@ -1,5 +1,6 @@
 package com.health.fitness.controller;
 
+import com.health.fitness.common.ApiResponse;
 import com.health.fitness.dto.LoginRequestDto;
 import com.health.fitness.dto.LoginResponseDto;
 import com.health.fitness.service.AuthService;
@@ -27,17 +28,10 @@ public class AuthController {
 
   // @PostMapping("/login") → POST /api/auth/login 요청을 이 메서드가 처리
   @PostMapping("/login")
-  public ResponseEntity<LoginResponseDto> login(
-      // @Valid → LoginRequestDto 안에 있는 @Email, @NotBlank 검사를 실행
-      // 검사 실패 시 400 Bad Request 자동 반환 (if문 안 써도 됨)
-      // @RequestBody → HTTP 요청의 Body(JSON)를 LoginRequestDto 객체로 변환
+  public ResponseEntity<ApiResponse<LoginResponseDto>> login(
       @Valid @RequestBody LoginRequestDto dto) {
-
-    // Service에 실제 로직 위임
     LoginResponseDto response = authService.login(dto);
-
-    // ResponseEntity.ok() → HTTP 200 OK 상태코드와 함께 response를 JSON으로 반환
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(ApiResponse.ok(response));
   }
 
   // 로그아웃은 JWT 방식에서는 서버가 할 게 없음
