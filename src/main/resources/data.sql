@@ -1,3 +1,5 @@
+TRUNCATE TABLE exercise;
+
 INSERT INTO exercise (name, part, description, youtube_search_keyword) VALUES
 -- 가슴 (CHEST)
 ('벤치 프레스', 'CHEST', '가슴 전체 근육을 발달시키는 기초 운동입니다.', 'bench press tutorial'),
