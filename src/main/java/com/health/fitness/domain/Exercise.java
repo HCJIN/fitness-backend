@@ -8,7 +8,9 @@ import lombok.*;
 
 @Table(name = "exercise")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 @Builder
 @AllArgsConstructor
 public class Exercise {
@@ -40,6 +42,7 @@ public class Exercise {
     @Builder.Default
     @Column(name = "youtube_search_keyword")
     private String youtubeSearchKeyword = "";
+
 
 
     //부위를 위한 Enum
