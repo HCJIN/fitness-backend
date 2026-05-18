@@ -1,16 +1,16 @@
 package com.health.fitness.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 // DB와 1:1로 매핑 객체임을 선언
 @Entity
 
 @Table(name = "exercise")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Exercise {
 
     //테이블의 식별자인 Primary Key임을 나타냄
@@ -37,7 +37,8 @@ public class Exercise {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String youtube_search_keyword;
+    @Column(name = "youtube_search_keyword")
+    private String youtubeSearchKeyword;
 
 
     //부위를 위한 Enum
