@@ -33,3 +33,10 @@ INSERT INTO exercise (name, part, description, youtube_search_keyword) VALUES
 ('덤벨 컬', 'ARM', '양팔을 번갈아 가며 이두근을 고립시키는 운동입니다.', 'dumbbell curl guide'),
 ('트라이셉스 푸쉬다운', 'ARM', '케이블을 이용해 삼두근을 강하게 수축시킵니다.', 'triceps pushdown form'),
 ('라잉 트라이셉스 익스텐션', 'ARM', '삼두근의 긴 머리를 발달시키는 고립 운동입니다.', 'lying triceps extension');
+
+
+INSERT INTO quest (title, type, required_count, reward_point) VALUES
+('물 8잔 마시기', 'SIMPLE', 1, 10),
+('30분 걷기', 'SIMPLE', 1, 15),
+('아침 스트레칭', 'SIMPLE', 1, 10),
+('7일 연속 출석', 'ATTENDANCE', 7, 50);
