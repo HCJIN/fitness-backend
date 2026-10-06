@@ -45,4 +45,9 @@ public class User {
   public void prePersist() {
     this.createdAt = LocalDate.now();
   }
+
+  // 퀘스트 완료 시 포인트 지급 (레벨업 로직은 STEP 4에서 추가)
+  public void addPoint(int amount) {
+    this.point += amount;
+  }
 }
