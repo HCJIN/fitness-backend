@@ -54,6 +54,18 @@ public class GlobalExceptionHandler {
         .body(ApiResponse.fail(e.getMessage()));
   }
 
+  // 퀘스트 중복 완료 처리
+  // Service에서 throw new DuplicateQuestException("오늘 이미 완료한 퀘스트입니다")
+  // → 409 Conflict
+  @ExceptionHandler(DuplicateQuestException.class)
+  public ResponseEntity<ApiResponse<Void>> handleDuplicateQuest(
+      DuplicateQuestException e) {
+
+    return ResponseEntity
+        .status(HttpStatus.CONFLICT)
+        .body(ApiResponse.fail(e.getMessage()));
+  }
+
   // 위에서 처리 못 한 나머지 모든 예외
   // 예상 못 한 서버 오류 → 500 Internal Server Error
   @ExceptionHandler(Exception.class)
